@@ -1,0 +1,69 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    app: monitoring
+  name: cluster-health-rules
+  namespace: open-cluster-management-observability
+spec:
+  groups:
+  - name: cluster-health
+    rules:
+    - alert: APIServerUnavailable
+      expr: avg_over_time(apiserver_request_success{code=~"(2..|3..|4..|5..)"}[5m])
+        < 0.95
+      for: 10m
+      labels:
+        environment: development
+        severity: warning
+        team: platform
+    - alert: HighCPUUsage
+      expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m]))
+        * 100) > 85
+      for: 20m
+      labels:
+        environment: development
+        severity: warning
+        team: infrastructure
+    - alert: HighMemoryUsage
+      expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) *
+        100 > 90
+      for: 20m
+      labels:
+        environment: development
+        severity: warning
+        team: infrastructure
+    - alert: DiskSpaceLow
+      expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}))
+        * 100 > 90
+      for: 20m
+      labels:
+        environment: development
+        severity: warning
+        team: infrastructure
+  - name: pod-health
+    rules:
+    - alert: PodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total[15m]) > 1
+      for: 10m
+      labels:
+        environment: development
+        severity: warning
+        team: application
+  - name: etcd-health
+    rules:
+    - alert: EtcdDown
+      for: 5m
+      labels:
+        environment: development
+        severity: warning
+        team: platform
+    - alert: EtcdHighLatency
+      expr: histogram_quantile(0.99, rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m]))
+        > 0.5
+      for: 10m
+      labels:
+        environment: development
+        severity: warning
+        team: platform

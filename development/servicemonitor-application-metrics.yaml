@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: monitoring
+  name: application-metrics
+  namespace: open-cluster-management-observability
+spec:
+  endpoints:
+  - interval: 60s
+    path: /metrics
+    port: http
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      prometheus.io/scrape: "true"

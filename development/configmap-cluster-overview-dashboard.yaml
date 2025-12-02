@@ -1,0 +1,41 @@
+apiVersion: v1
+data:
+  cluster-overview.json: |-
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Cluster Overview",
+        "tags": ["monitoring", "cluster"],
+        "refresh": "30s",
+        "panels": [
+          {
+            "id": 1,
+            "title": "API Server Requests",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(apiserver_request_total[5m])) by (cluster)",
+                "legendFormat": "{{ cluster }} - Requests/sec"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Node Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"}) by (cluster)",
+                "legendFormat": "Ready Nodes"
+              }
+            ]
+          }
+        ]
+      }
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    grafana_dashboard: "true"
+  name: cluster-overview-dashboard
+  namespace: open-cluster-management-observability

@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-development
+  namespace: openshift-gitops
+  labels:
+    env: development
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/EniyanK-RCC/RHACM_Monitoring.git
+    targetRevision: main
+    path: development
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
