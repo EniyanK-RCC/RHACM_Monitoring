@@ -42,15 +42,6 @@ spec:
         environment: development
         severity: warning
         team: infrastructure
-  - name: pod-health
-    rules:
-    - alert: PodCrashLooping
-      expr: rate(kube_pod_container_status_restarts_total[15m]) > 1
-      for: 10m
-      labels:
-        environment: development
-        severity: warning
-        team: application
   - name: etcd-health
     rules:
     - alert: EtcdDown
